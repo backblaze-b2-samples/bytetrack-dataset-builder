@@ -19,7 +19,7 @@ The headline B2 story is **storage amplification**: 1 TB of source video routine
 
 ## What it looks like
 
-**Dashboard** — footage ingested, datasets built, total tracks, total clips, total releases, and B2 storage used, with a tracks-per-dataset chart and the most recent builds.
+**Dashboard** — footage ingested, datasets built, total object tracks, MOT releases, and B2 storage used, with a tracks-per-dataset chart and the most recent builds.
 
 ![Dashboard with builder metrics, a tracks chart, and recent builds](docs/images/dashboard.png)
 
