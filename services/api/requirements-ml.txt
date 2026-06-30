@@ -1,0 +1,33 @@
+# Heavy local CV stack for the tracking-dataset engine (detect + ByteTrack +
+# per-track clip encode + MOT packaging).
+#
+# These are intentionally SEPARATE from requirements.txt: the API boots and
+# `pnpm test:api` / `pnpm check:structure` pass WITHOUT this file installed,
+# because everything here is lazy-imported inside app/service/engine/ only at
+# the moment a build job actually runs.
+#
+# Install when you want to run the pipeline:
+#   cd services/api && source .venv/bin/activate
+#   pip install -r requirements-ml.txt
+#
+# Device note: CPU works for a short clip with the default keyless model. The
+# engine auto-detects CUDA -> Apple MPS -> CPU at runtime (see
+# app/service/engine/device.py) and defaults to CPU; MAX_FRAMES caps a CPU
+# demo so a build finishes fast. No GPU is ever required.
+
+# Roboflow runtime + tracking. `inference` pulls opencv/onnxruntime/numpy and
+# is a HEAVY install. The default `rfdetr-base` COCO model runs LOCALLY with NO
+# API key; weights auto-download on first use. `supervision` provides the
+# genuine ByteTrack association (sv.ByteTrack) — the central, named component.
+inference>=0.30.0
+supervision>=0.25.0
+
+# Frame decode (also pulled transitively by inference; pinned here so the
+# engine's cv2 import is satisfied on a clean install).
+opencv-python-headless>=4.8.0
+
+# Per-track clip encoding goes through the BUNDLED libx264-capable ffmpeg from
+# imageio-ffmpeg (NOT bare Homebrew ffmpeg, which may ship slim). H.264 /
+# yuv420p / +faststart so clips play inline in a <video> element.
+imageio-ffmpeg>=0.5.1
+imageio[ffmpeg]>=2.34.0
