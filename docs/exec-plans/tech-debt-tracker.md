@@ -13,4 +13,5 @@ Known tech debt items. Agents update this when they discover or create tech debt
 | `_humanize_bytes` duplicated in Python (repo + service) | DRY violation, drift risk | Extract to `app/types/formatting.py` shared util | Medium | Resolved |
 | `humanizeBytes` duplicated in TypeScript | DRY violation | Extract to `lib/utils.ts` | Low | Open |
 | `formatDate` duplicated in TypeScript | DRY violation | Extract to `lib/utils.ts` | Low | Open |
+| No bounding box overlay on track clips | Can't visually verify tracking quality; clips show the cropped object but no bbox, track ID, or confidence drawn | Server-side: add `sv.BoundingBoxAnnotator` in `service/engine/clips.py` before encoding (subtract crop offset from bbox coords). Client-side alt: canvas overlay on `<video>` in `track-row.tsx` synced via `timeupdate` + annotation JSON endpoint | Low | Open |
 | No test harness for feature specs | No automated verification | Add pytest fixtures + test files per feature | Medium | Resolved (partial — tests added for upload, files, activity, errors) |
