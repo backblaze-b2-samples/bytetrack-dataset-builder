@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 import {
   ApiError,
   buildDataset,
@@ -151,12 +152,44 @@ export function useTrackClipUrl(
 
 // Polls while any build is still running so progress badges + the detail page
 // refresh live as the background pipeline advances.
+//
+// The job registry is ephemeral and learns a build finished (done/error) one
+// poll before the authoritative dataset manifest query would notice — and with
+// the 30s global staleTime, `dataset(id)` won't auto-refetch on its own. So
+// when a job crosses into a terminal state we invalidate the dataset queries
+// here, pulling the freshly-built tracks/releases without a manual page refresh.
 export function useBuildJobs(poll = false) {
-  return useQuery<BuildJob[], ApiError>({
+  const qc = useQueryClient();
+  // Job ids already reconciled to their terminal state. Seeded on the first
+  // poll so we react only to jobs that *transition* to done/error while this
+  // hook is mounted, not to builds that finished before we started watching.
+  const reconciled = useRef<Set<string> | null>(null);
+
+  const query = useQuery<BuildJob[], ApiError>({
     queryKey: qk.jobs(),
     queryFn: getBuildJobs,
     refetchInterval: poll ? 2000 : false,
   });
+
+  const jobs = query.data;
+  useEffect(() => {
+    if (!jobs) return;
+    const isTerminal = (j: BuildJob) => j.status === "done" || j.status === "error";
+    if (reconciled.current === null) {
+      reconciled.current = new Set(jobs.filter(isTerminal).map((j) => j.id));
+      return;
+    }
+    for (const job of jobs) {
+      if (isTerminal(job) && !reconciled.current.has(job.id)) {
+        reconciled.current.add(job.id);
+        qc.invalidateQueries({ queryKey: qk.dataset(job.dataset_id) });
+        qc.invalidateQueries({ queryKey: qk.datasets() });
+        qc.invalidateQueries({ queryKey: qk.datasetStats() });
+      }
+    }
+  }, [jobs, qc]);
+
+  return query;
 }
 
 export function useCreateDataset() {

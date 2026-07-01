@@ -1,4 +1,4 @@
-<!-- last_verified: 2026-06-30 -->
+<!-- last_verified: 2026-07-01 -->
 # Feature: Datasets explorer
 
 ## Purpose
@@ -28,7 +28,7 @@ The scoped, app-specific explorer + full lifecycle (create / read / edit / delet
 | read | `/datasets` list + `/datasets/[id]` detail (stats, tracks, clip playback, release download, load-from-B2 snippet) |
 | edit | `/datasets/[id]/edit` — rename/redescribe anytime; build config editable only while `draft` |
 | delete | confirm dialog → scoped delete of `dataset/<id>/` |
-| run | Build / Rebuild with live progress via `service/jobs.py` (a rebuild cuts a new release version) |
+| run | Build / Rebuild with live progress via `service/jobs.py` (a rebuild cuts a new release version). `useBuildJobs` polls the ephemeral registry; when a job crosses into `done`/`error` it invalidates `dataset(id)` / `datasets()` / `datasetStats()` so the built tracks + releases appear immediately — no manual page refresh |
 
 ## Inputs / Outputs
 - Create/edit: `{ name, description, config: DatasetConfig }` (source_key, detection_model, track_classes, thresholds, max_frames)
@@ -43,6 +43,7 @@ The scoped, app-specific explorer + full lifecycle (create / read / edit / delet
 ## UX States
 - Empty: "No datasets yet"
 - Loading: skeleton rows; per-build progress badges
+- Build completes: detail/list auto-refresh from the job-completion invalidation (no manual refresh needed)
 - Error: inline error state with retry; failed build shows the error on the detail page
 
 ## Verification
