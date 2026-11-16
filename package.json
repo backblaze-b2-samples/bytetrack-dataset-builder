@@ -41,7 +41,7 @@
       "lodash": "^4.18.1",
       "express-rate-limit": "^8.2.2",
       "ip-address": "^10.3.1",
-      "qs": "^6.16.0",
+      "qs": "^6.17.1",
       "js-yaml": "^4.3.1",
       "body-parser": "^2.3.0",
       "fast-uri": "^3.1.6",
